@@ -30,12 +30,16 @@ struct std::vector<Space> Word::findSentence(const std::string sentence) {
 			// We reached the end of the word if we are at the end of our words or we encounter a space in the next index
 			const int endOfWord = j == sentenceLength - 1 || sentence[j + 1] == ' ';
 			if (letters[i] == sentence[j] && hitIndex < 0) {
+#ifdef DEBUG
 				printf("Found potential start\n");
+#endif
 				hitIndex = i;
 			}
 			// Keep holding the hitindex until we finish our word
 			if (endOfWord && letters[i] == sentence[j] && hitIndex >= 0 && hitLength == wordLength) {
+#ifdef DEBUG
 				printf("Found final letter (%c) on index %d\n", letters[i], i);
+#endif
 				struct Space r = { convertToLedIndex(hitIndex, hitLength), hitLength};
 				result.push_back(r);
 				// Move to the next word by skipping a potential space
@@ -47,7 +51,9 @@ struct std::vector<Space> Word::findSentence(const std::string sentence) {
 				break;
 				// No hit? Reset it and start over!
 			} else if (letters[i] != sentence[j]) {
+#ifdef DEBUG
 				printf("Couldn't find %c. Encountered %c\n", sentence[j], letters[i]);
+#endif
 				hitIndex = -1;
 				// The non matched letter could be a potential start
 				if (letters[i] == sentence[nextWordStartIndex]) {
@@ -56,8 +62,9 @@ struct std::vector<Space> Word::findSentence(const std::string sentence) {
 				}
 				break;
 			}
-
+#ifdef DEBUG
 			printf("Matched (%c) on index %d\n", letters[i], i);
+#endif
 			// Move to the next letter!
 			i = i + 1;
 		}
