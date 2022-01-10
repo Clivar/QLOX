@@ -45,7 +45,7 @@ struct std::vector<Space> Word::findSentence(const std::string sentence) {
 				// Move to the next word by skipping a potential space
 				nextWordStartIndex = j + 2;
 				// We can also move up in letter indexes since words should never be right next to eachother.
-				i = i + 1;
+				// i = i + 1;
 				// Let's start looking for our next word by resetting the hitIndex
 				hitIndex = -1;
 				break;
