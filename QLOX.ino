@@ -22,22 +22,27 @@ const std::string letters = "HETDAGNBPLUISZEG"
 							"SEPTEMBERJANUARI"
 							"TRMAARTWOKTOBERK"
 							"NOVEMBERDECEMBER";
+
 static class Word w = Word(letters, 16);
 
 RTC_DS3231 rtc;
-Adafruit_NeoPixel strip0 = Adafruit_NeoPixel(256,33);
+Adafruit_NeoPixel strip0 = Adafruit_NeoPixel(256, 33);
 
 uint32_t wit = strip0.Color(255, 255, 255);
 
+int minutesSinceLastRender;
+int hourSinceLastRender;
+
 void initialize() {
-	strip0.begin();//maak je object klaar
-	strip0.setBrightness(20);//zet de helderheid wat lager (getal tussen 0 en brightness)
-	strip0.show(); // toon de ingestelde kleuren (aangezien er nog geen kleuren zijn ingesteld, betekent dit hier: zet de display uit)
+	strip0.begin();
+	strip0.setBrightness(20);
+	strip0.show();
 	rtc.begin();
 	rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 }
 
 void drawSentence(const std::string sentence) {
+	strip0.fill((0, 0, 0));
 	std::vector<Space> r = w.findSentence(sentence);
 	for (int i = 0; i < r.size(); i++) {
 		strip0.fill(wit, r[i].position, r[i].length);
@@ -63,58 +68,64 @@ std::string numberToText(int number) {
 		case 13: return "DERTIEN";
 		case 14: return "VEERTIEN";
 	}
-  #ifdef DEBUG
+#ifdef DEBUG
 	Serial.println("Unknown number: " + number);
-  #endif
+#endif
 	return "";
 }
 
-std::string timeToLiteral(DateTime now) {
-	const int hour = now.hour() > 12 ? now.hour() - 12 : now.hour();
-	const int minute = now.minute(); 
-	if (minute == 0) {
+std::string timeToLiteral(int hour, int minutes) {
+	hour = hour > 12 ? hour - 12 : hour;
+	if (minutes == 0) {
 		return numberToText(hour) + " UUR";
 	}
-	if (0 < minute && minute < 15) {
-		return numberToText(minute) + " OVER " + numberToText(hour);
+	if (0 < minutes && minutes < 15) {
+		return numberToText(minutes) + " OVER " + numberToText(hour);
 	}
-	if (minute == 15) {
-		return "KWART NA " + numberToText(hour);
+	if (minutes == 15) {
+		return "KWART OVER " + numberToText(hour);
 	}
-	if (15 < minute && minute < 30) {
-		return numberToText(30-minute) + " VOOR HALF " + numberToText(hour+1);
+	if (15 < minutes && minutes < 30) {
+		return numberToText(30 - minutes) + " VOOR HALF " + numberToText(hour + 1);
 	}
-	if (minute == 30) {
+	if (minutes == 30) {
 		return "HALF " + numberToText(hour);
 	}
-	if (30 < minute && minute < 45) {
-		return numberToText(minute-30) + " OVER HALF " + numberToText(hour+1);
+	if (30 < minutes && minutes < 45) {
+		return numberToText(minutes - 30) + " OVER HALF " + numberToText(hour + 1);
 	}
-	if (minute == 45) {
+	if (minutes == 45) {
 		return "KWART VOOR " + numberToText(hour);
 	}
-	if (45 < minute) {
-		return numberToText(60-minute) + " VOOR " + numberToText(hour+1);
+	if (45 < minutes) {
+		return numberToText(60 - minutes) + " VOOR " + numberToText(hour + 1);
 	}
-  #ifdef DEBUG
-	Serial.println("Invalid minutes: " + minute);
-  #endif
+#ifdef DEBUG
+	Serial.println("Invalid minutes: " + minutes);
+#endif
 	return "";
 }
 
 void setup() {
-	#ifdef DEBUG
+#ifdef DEBUG
 	Serial.begin(9600);
 	Serial.println("Debug mode active");
-	#endif
+#endif
 	initialize();
 }
 
 void loop() {
-	strip0.fill((0,0,0));
 	const DateTime now = rtc.now();
-	std::string timeInText = "HET IS " + timeToLiteral(now);
+  const int hour = now.hour();
+  const int minutes = now.minute();
+	if (minutes == minutesSinceLastRender && hour == hourSinceLastRender) {
+		return;
+	}
+
+	std::string timeInText = "HET IS " + timeToLiteral(hour, minutes);
 	drawSentence(timeInText.c_str());
+
+	hourSinceLastRender = hour;
+	minutesSinceLastRender = minutes;
 	delay(10000);
 }
-
