@@ -116,8 +116,8 @@ void setup() {
 
 void loop() {
 	const DateTime now = rtc.now();
-  const int hour = now.hour();
-  const int minutes = now.minute();
+	const int hour = now.hour();
+	const int minutes = now.minute();
 	if (minutes == minutesSinceLastRender && hour == hourSinceLastRender) {
 		return;
 	}
