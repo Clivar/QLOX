@@ -5,6 +5,7 @@
 #include "word.h"
 
 #define DEBUG
+// #define RESET_TIME
 
 const std::string letters = "HETDAGNBPLUISZEG"
 							"RALKISTEENZESELF"
@@ -30,24 +31,23 @@ Adafruit_NeoPixel strip0 = Adafruit_NeoPixel(256, 33);
 
 uint32_t wit = strip0.Color(255, 255, 255);
 
-int minutesSinceLastRender;
-int hourSinceLastRender;
-
 void initialize() {
 	strip0.begin();
 	strip0.setBrightness(20);
 	strip0.show();
 	rtc.begin();
+#ifdef RESET_TIME
 	rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+#endif
 }
 
 void drawSentence(const std::string sentence) {
-	strip0.fill((0, 0, 0));
+	strip0.clear();
 	std::vector<Space> r = w.findSentence(sentence);
 	for (int i = 0; i < r.size(); i++) {
 		strip0.fill(wit, r[i].position, r[i].length);
-		strip0.show();
 	}
+	strip0.show();
 }
 
 std::string numberToText(int number) {
@@ -118,9 +118,8 @@ void loop() {
 	const DateTime now = rtc.now();
 	const int hour = now.hour();
 	const int minutes = now.minute();
-	if (minutes == minutesSinceLastRender && hour == hourSinceLastRender) {
-		return;
-	}
+
+
 
 	std::string timeInText = "HET IS " + timeToLiteral(hour, minutes);
 	drawSentence(timeInText.c_str());
