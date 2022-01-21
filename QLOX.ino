@@ -1,8 +1,10 @@
 #include <Adafruit_NeoPixel.h>
 #include <Wire.h>
 #include "RTClib.h"
-#include <iostream>
-#include "Words_lib/word.h"
+#include <vector>
+#include <string>
+#include "src/Word_lib/word.h"
+#include "src/Word_lib/matrix.h"
 
 #define DEBUG
 // #define RESET_TIME
@@ -25,6 +27,7 @@ const std::string letters = "HETDAGNBPLUISZEG"
 							"NOVEMBERDECEMBER";
 
 static class Word w = Word(letters, 16);
+static class Matrix m = Matrix(16, 16);
 
 RTC_DS3231 rtc;
 Adafruit_NeoPixel strip0 = Adafruit_NeoPixel(256, 33);
@@ -43,9 +46,13 @@ void initialize() {
 
 void drawSentence(const std::string sentence) {
 	strip0.clear();
-	std::vector<Space> r = w.findSentence(sentence);
+	std::vector<int> r = w.findSentence(sentence);
 	for (int i = 0; i < r.size(); i++) {
-		strip0.fill(wit, r[i].position, r[i].length);
+		Space s = m.indexToCoordinates(r[i]);
+		printf("x: %d y: %d (index: %d)", s.x, s.y, r[i]);
+		int led = m.coordinatesToLed(s);
+		printf(" led index: %d\n", led);
+		strip0.setPixelColor(led, wit);
 	}
 	strip0.show();
 }
