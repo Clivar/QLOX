@@ -1,23 +1,20 @@
-//
-// Created by Anthony on 8/01/2022.
-//
 #include <cstring>
 #include <cstdio>
 #include <cmath>
 #include <iostream>
 #include "word.h"
 
-Word::Word(const std::string letters, const int numberOfColumns) {
+Word::Word(const std::string& letters, const int numberOfColumns) {
 	this->letters = letters;
 	this->lettersLength = letters.length();
 	this->numberOfColumns = numberOfColumns;
 }
 
-struct std::vector<Space> Word::findSentence(const std::string sentence) {
+struct std::vector<Space> Word::findSentence(const std::string& sentence) {
 	int sentenceLength = sentence.length();
 	std::vector<Space> result;
 
-	int hitIndex = -1;
+	std::vector<int> hits;
 	int nextWordStartIndex = 0;
 	for (int i = 0; i < lettersLength; i++) {
 		if (nextWordStartIndex >= sentenceLength - 1) {

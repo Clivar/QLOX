@@ -5,11 +5,7 @@
 #ifndef QLOX_WORD_H
 #define QLOX_WORD_H
 #include <vector>
-
-struct Space {
-	int position;
-	int length;
-};
+#include "matrix.h"
 
 class Word {
 private:
@@ -19,8 +15,8 @@ private:
 	int convertToLedIndex(int index, int length) const;
 
 public:
-	Word(const std::string letters, const int numberOfColumns);
-	struct std::vector<Space> findSentence(const std::string sentence);
+	Word(const std::string& letters, const int numberOfColumns);
+	struct std::vector<Space> findSentence(const std::string& sentence);
 };
 
 #endif //QLOX_WORD_H

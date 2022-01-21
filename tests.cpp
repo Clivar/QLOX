@@ -1,5 +1,5 @@
 #include <iostream>
-#include "word.h"
+#include "Words_lib/word.h"
 
 #ifndef ARDUINO
 const std::string letters = "HETDAGNBPLUISZEG"

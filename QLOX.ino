@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include "RTClib.h"
 #include <iostream>
-#include "word.h"
+#include "Words_lib/word.h"
 
 #define DEBUG
 // #define RESET_TIME
@@ -119,12 +119,8 @@ void loop() {
 	const int hour = now.hour();
 	const int minutes = now.minute();
 
-
-
 	std::string timeInText = "HET IS " + timeToLiteral(hour, minutes);
 	drawSentence(timeInText.c_str());
 
-	hourSinceLastRender = hour;
-	minutesSinceLastRender = minutes;
 	delay(10000);
 }
