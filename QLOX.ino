@@ -96,13 +96,13 @@ std::string timeToLiteral(int hour, int minutes) {
 		return numberToText(30 - minutes) + " VOOR HALF " + numberToText(hour + 1);
 	}
 	if (minutes == 30) {
-		return "HALF " + numberToText(hour);
+		return "HALF " + numberToText(hour + 1);
 	}
 	if (30 < minutes && minutes < 45) {
 		return numberToText(minutes - 30) + " OVER HALF " + numberToText(hour + 1);
 	}
 	if (minutes == 45) {
-		return "KWART VOOR " + numberToText(hour);
+		return "KWART VOOR " + numberToText(hour + 1);
 	}
 	if (45 < minutes) {
 		return numberToText(60 - minutes) + " VOOR " + numberToText(hour + 1);
@@ -128,6 +128,15 @@ void loop() {
 
 	std::string timeInText = "HET IS " + timeToLiteral(hour, minutes);
 	drawSentence(timeInText.c_str());
-
-	delay(10000);
+	delay(3000);
+	for (int i = 0; i < 16; ++i) {
+		for (int j = 0; j < 16; ++j) {
+			strip0.clear();
+			Space s = { j, i };
+			int led = m.coordinatesToLed(s);
+			strip0.setPixelColor(led, wit);
+			strip0.show();
+			delay(50);
+		}
+	}
 }
