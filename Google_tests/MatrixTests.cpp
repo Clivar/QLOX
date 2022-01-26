@@ -42,7 +42,7 @@ TEST_F(WordFixture, IndexToCoordinates) {
 }
 
 TEST_F(WordFixture, SingleWordOnFirstRow){
-	std::vector<int> result = word->findSentence("HET");
+	std::vector<int> result = word->findSentence("HET IS EEN OVER HALF EEN");
 	EXPECT_EQ(0, result[0]);
 	EXPECT_EQ(1, result[1]);
 	EXPECT_EQ(2, result[2]);
