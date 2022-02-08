@@ -2,7 +2,7 @@
 #include <Preferences.h>
 #include "WiFi.h"
 
-class QloxWifi
+class Wireless
 {
 public:
     static void setup();

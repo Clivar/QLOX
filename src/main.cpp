@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "QloxWifi.h"
-#include "QloxApi.h"
+#include "Wireless.h"
+#include "Api.h"
 
 #include "FastLED.h"
 #include <Wire.h>
@@ -224,18 +224,18 @@ void setup()
 #ifdef DEBUG
   Serial.println("Debug mode active");
 #endif
-  QloxWifi::setup();
-  QloxApi::setup(&rtc);
+  Wireless::setup();
+  Api::setup(&rtc);
   initialize();
 }
 
 void loop()
 {
-  const DateTime now = rtc.now();
+  const DateTime now = Api::GetTime();
   const int hour = now.hour();
   const int minutes = now.minute();
 
-  const ApiConfigurableOptions options = QloxApi::getConfigurableOptions();
+  const ApiConfigurableOptions options = Api::GetConfigurableOptions();
   FastLED.setBrightness(options.Brightness);
 
   std::string timeInText = "HET IS " + timeToLiteral(hour, minutes);

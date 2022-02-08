@@ -3,18 +3,18 @@
 #include "WiFi.h"
 #include <algorithm>
 #include "BroadcastDiscover.h"
-#include "QloxApi.h"
-#include "QloxWifi.h"
+#include "Api.h"
+#include "Wireless.h"
 
 #define DEFAULT_SSID "QLOX"
 #define DEFAULT_PASSWORD "QLOXqlox"
 #define HOSTNAME "QLOX"
 
-Preferences QloxWifi::preferences;
-String QloxWifi::ssid;
-String QloxWifi::pass;
+Preferences Wireless::preferences;
+String Wireless::ssid;
+String Wireless::pass;
 
-void QloxWifi::setup()
+void Wireless::setup()
 {
     WiFi.onEvent(wiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
     WiFi.onEvent(wiFiGotIP, SYSTEM_EVENT_STA_GOT_IP);
@@ -27,7 +27,7 @@ void QloxWifi::setup()
     WiFi.onEvent(wiFiAPStop, SYSTEM_EVENT_AP_STOP);
 
     String hostName = HOSTNAME;
-    if (QloxWifi::tryGetSettings())
+    if (Wireless::tryGetSettings())
     {
         Serial.println("Initialised as STA");
         WiFi.setHostname(hostName.c_str());
@@ -47,7 +47,7 @@ void QloxWifi::setup()
     }
 }
 
-bool QloxWifi::tryGetSettings()
+bool Wireless::tryGetSettings()
 {
     preferences.begin("wifi", true);
     ssid = preferences.getString("ssid", "");
@@ -57,27 +57,27 @@ bool QloxWifi::tryGetSettings()
     return strcmp(ssid.c_str(), "") && strcmp(pass.c_str(), "");
 }
 
-void QloxWifi::wiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("Connected to AP successfully!");
 }
 
-void QloxWifi::wiFiAPClientConnected(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiAPClientConnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("Client connected");
 }
 
-void QloxWifi::WiFiAPClientDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::WiFiAPClientDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("Client disconnected");
 }
 
-void QloxWifi::wiFiAPClientAssignedIP(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiAPClientAssignedIP(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("Client has been assigned an IP");
 }
 
-void QloxWifi::wiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("WiFi connected");
     Serial.println("IP address: ");
@@ -85,7 +85,7 @@ void QloxWifi::wiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
     listenForBroadcast(WiFi.localIP().toString());
 }
 
-void QloxWifi::wiFiAPStart(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiAPStart(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("WiFi Soft AP started");
     Serial.println("IP address: ");
@@ -93,14 +93,14 @@ void QloxWifi::wiFiAPStart(WiFiEvent_t event, WiFiEventInfo_t info)
     listenForBroadcast(WiFi.localIP().toString());
 }
 
-void QloxWifi::wiFiAPStop(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiAPStop(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("WiFi Soft AP stopped");
     Serial.println("Trying to Restart");
     WiFi.softAP(ssid.c_str(), pass.c_str());
 }
 
-void QloxWifi::wiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
+void Wireless::wiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("Disconnected from WiFi access point");
     Serial.print("WiFi lost connection.");
