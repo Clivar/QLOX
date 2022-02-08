@@ -1,8 +1,9 @@
 #include "Api.h"
-#include "WiFi.h"
 
 SemaphoreHandle_t Api::configMutex = nullptr;
 SemaphoreHandle_t Api::rtcMutex = nullptr;
+SemaphoreHandle_t Api::wirelessMutex = nullptr;
+
 Preferences Api::preferences;
 RTC_DS3231 *Api::rtc;
 
@@ -15,19 +16,20 @@ void Api::setup(RTC_DS3231 *rtcPtr)
     // Create mutex before starting tasks
     configMutex = xSemaphoreCreateMutex();
     rtcMutex = xSemaphoreCreateMutex();
+    wirelessMutex = xSemaphoreCreateMutex();
 
+    // Initialize webserver URLs
     server.on("/api/config", HTTP_GET, GetConfig);
     server.on("/api/time", HTTP_GET, [](AsyncWebServerRequest *request)
               { return GetTime(request); });
     server.on("/api/wireless", HTTP_GET, [](AsyncWebServerRequest *request)
               { return GetWireless(request); });
-    // Initialize webserver URLs
     AsyncCallbackJsonWebHandler *configHandler = new AsyncCallbackJsonWebHandler("/api/config", PutConfig);
     server.addHandler(configHandler);
     AsyncCallbackJsonWebHandler *timeHandler = new AsyncCallbackJsonWebHandler("/api/time", PutTime);
     server.addHandler(timeHandler);
-    AsyncCallbackJsonWebHandler *timeHandler = new AsyncCallbackJsonWebHandler("/api/wireless", PutWireless);
-    server.addHandler(timeHandler);
+    AsyncCallbackJsonWebHandler *wirelessHandler = new AsyncCallbackJsonWebHandler("/api/wireless", PutWireless);
+    server.addHandler(wirelessHandler);
     server.begin();
 }
 
@@ -55,23 +57,22 @@ void Api::PutWireless(AsyncWebServerRequest *request, JsonVariant &jsonBody)
     String ssid = jsonBody["ssid"].as<String>();
     String password = jsonBody["password"].as<String>();
 
+    xSemaphoreTake(wirelessMutex, portMAX_DELAY);
     preferences.begin("wireless");
     preferences.putString("ssid", ssid);
     preferences.putString("password", password);
     preferences.end();
 
     GetWireless(request);
-    ESP.restart();
-}
-
-void Api::PutTime(AsyncWebServerRequest *request, JsonVariant &jsonBody)
-{
-    const DateTime time = DateTime(jsonBody["time"].as<const char *>());
-    xSemaphoreTake(rtcMutex, portMAX_DELAY);
-    rtc->adjust(time);
-    xSemaphoreGive(rtcMutex);
-
-    GetTime(request);
+    xTaskCreate(
+        [](void *parameters)
+        {
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            xSemaphoreTake(configMutex, portMAX_DELAY);
+            xSemaphoreTake(rtcMutex, portMAX_DELAY);
+            ESP.restart();
+        },
+        "RestartESP", 1024, NULL, 1, NULL);
 }
 
 void Api::GetTime(AsyncWebServerRequest *request)

@@ -49,7 +49,7 @@ void Wireless::setup()
 
 bool Wireless::tryGetSettings()
 {
-    preferences.begin("wifi", true);
+    preferences.begin("wireless", true);
     ssid = preferences.getString("ssid", "");
     pass = preferences.getString("password", "");
     preferences.end();

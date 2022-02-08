@@ -27,6 +27,7 @@ private:
     static RTC_DS3231 *rtc;
     static SemaphoreHandle_t configMutex;
     static SemaphoreHandle_t rtcMutex;
+    static SemaphoreHandle_t wirelessMutex;
     static Preferences preferences;
     static void PersistConfigurableOptions(ApiConfigurableOptions options);
     static void GetTime(AsyncWebServerRequest *request);
