@@ -231,7 +231,7 @@ void setup()
 
 void loop()
 {
-  const DateTime now = Api::GetTime();
+  const DateTime now = Api::getTime();
   const int hour = now.hour();
   const int minutes = now.minute();
 

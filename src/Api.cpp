@@ -19,21 +19,21 @@ void Api::setup(RTC_DS3231 *rtcPtr)
     wirelessMutex = xSemaphoreCreateMutex();
 
     // Initialize webserver URLs
-    server.on("/api/config", HTTP_GET, GetConfig);
+    server.on("/api/config", HTTP_GET, getConfig);
     server.on("/api/time", HTTP_GET, [](AsyncWebServerRequest *request)
-              { return GetTime(request); });
+              { return getTime(request); });
     server.on("/api/wireless", HTTP_GET, [](AsyncWebServerRequest *request)
-              { return GetWireless(request); });
-    AsyncCallbackJsonWebHandler *configHandler = new AsyncCallbackJsonWebHandler("/api/config", PutConfig);
+              { return getWireless(request); });
+    AsyncCallbackJsonWebHandler *configHandler = new AsyncCallbackJsonWebHandler("/api/config", putConfig);
     server.addHandler(configHandler);
-    AsyncCallbackJsonWebHandler *timeHandler = new AsyncCallbackJsonWebHandler("/api/time", PutTime);
+    AsyncCallbackJsonWebHandler *timeHandler = new AsyncCallbackJsonWebHandler("/api/time", putTime);
     server.addHandler(timeHandler);
-    AsyncCallbackJsonWebHandler *wirelessHandler = new AsyncCallbackJsonWebHandler("/api/wireless", PutWireless);
+    AsyncCallbackJsonWebHandler *wirelessHandler = new AsyncCallbackJsonWebHandler("/api/wireless", putWireless);
     server.addHandler(wirelessHandler);
     server.begin();
 }
 
-DateTime Api::GetTime()
+DateTime Api::getTime()
 {
     xSemaphoreTake(rtcMutex, portMAX_DELAY);
     const DateTime now = rtc->now();
@@ -41,7 +41,7 @@ DateTime Api::GetTime()
     return now;
 }
 
-void Api::GetWireless(AsyncWebServerRequest *request)
+void Api::getWireless(AsyncWebServerRequest *request)
 {
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(100);
@@ -52,7 +52,7 @@ void Api::GetWireless(AsyncWebServerRequest *request)
     request->send(response);
 }
 
-void Api::PutWireless(AsyncWebServerRequest *request, JsonVariant &jsonBody)
+void Api::putWireless(AsyncWebServerRequest *request, JsonVariant &jsonBody)
 {
     String ssid = jsonBody["ssid"].as<String>();
     String password = jsonBody["password"].as<String>();
@@ -63,7 +63,7 @@ void Api::PutWireless(AsyncWebServerRequest *request, JsonVariant &jsonBody)
     preferences.putString("password", password);
     preferences.end();
 
-    GetWireless(request);
+    getWireless(request);
     xTaskCreate(
         [](void *parameters)
         {
@@ -75,9 +75,9 @@ void Api::PutWireless(AsyncWebServerRequest *request, JsonVariant &jsonBody)
         "RestartESP", 1024, NULL, 1, NULL);
 }
 
-void Api::GetTime(AsyncWebServerRequest *request)
+void Api::getTime(AsyncWebServerRequest *request)
 {
-    const DateTime now = GetTime();
+    const DateTime now = getTime();
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     DynamicJsonDocument json(100);
     json["time"] = now.timestamp();
@@ -86,17 +86,17 @@ void Api::GetTime(AsyncWebServerRequest *request)
     request->send(response);
 }
 
-void Api::PutTime(AsyncWebServerRequest *request, JsonVariant &jsonBody)
+void Api::putTime(AsyncWebServerRequest *request, JsonVariant &jsonBody)
 {
     const DateTime time = DateTime(jsonBody["time"].as<const char *>());
     xSemaphoreTake(rtcMutex, portMAX_DELAY);
     rtc->adjust(time);
     xSemaphoreGive(rtcMutex);
 
-    GetTime(request);
+    getTime(request);
 }
 
-void Api::GetConfig(AsyncWebServerRequest *request)
+void Api::getConfig(AsyncWebServerRequest *request)
 {
     const ApiConfigurableOptions options = GetConfigurableOptions();
     AsyncResponseStream *response = request->beginResponseStream("application/json");
@@ -110,7 +110,7 @@ void Api::GetConfig(AsyncWebServerRequest *request)
     request->send(response);
 }
 
-void Api::PutConfig(AsyncWebServerRequest *request, JsonVariant &jsonBody)
+void Api::putConfig(AsyncWebServerRequest *request, JsonVariant &jsonBody)
 {
     JsonObject jsonObj = jsonBody.as<JsonObject>();
     ApiConfigurableOptions options;
@@ -118,11 +118,11 @@ void Api::PutConfig(AsyncWebServerRequest *request, JsonVariant &jsonBody)
     options.Blue = jsonObj["blue"];
     options.Green = jsonObj["green"];
     options.Brightness = jsonObj["brightness"];
-    PersistConfigurableOptions(options);
-    GetConfig(request);
+    persistConfigurableOptions(options);
+    getConfig(request);
 }
 
-void Api::PersistConfigurableOptions(ApiConfigurableOptions options)
+void Api::persistConfigurableOptions(ApiConfigurableOptions options)
 {
     xSemaphoreTake(configMutex, portMAX_DELAY);
     preferences.begin("api");
@@ -147,7 +147,7 @@ ApiConfigurableOptions Api::GetConfigurableOptions()
     xSemaphoreGive(configMutex);
     if (!found)
     {
-        PersistConfigurableOptions(options);
+        persistConfigurableOptions(options);
     }
 
     return options;

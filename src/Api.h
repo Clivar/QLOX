@@ -20,7 +20,7 @@ class Api
 public:
     static void setup(RTC_DS3231 *rtc);
     static ApiConfigurableOptions GetConfigurableOptions();
-    static DateTime GetTime();
+    static DateTime getTime();
     static AsyncWebServer server;
 
 private:
@@ -29,11 +29,11 @@ private:
     static SemaphoreHandle_t rtcMutex;
     static SemaphoreHandle_t wirelessMutex;
     static Preferences preferences;
-    static void PersistConfigurableOptions(ApiConfigurableOptions options);
-    static void GetTime(AsyncWebServerRequest *request);
-    static void PutTime(AsyncWebServerRequest *request, JsonVariant &json);
-    static void GetConfig(AsyncWebServerRequest *request);
-    static void PutConfig(AsyncWebServerRequest *request, JsonVariant &json);
-    static void GetWireless(AsyncWebServerRequest *request);
-    static void PutWireless(AsyncWebServerRequest *request, JsonVariant &json);
+    static void persistConfigurableOptions(ApiConfigurableOptions options);
+    static void getTime(AsyncWebServerRequest *request);
+    static void putTime(AsyncWebServerRequest *request, JsonVariant &json);
+    static void getConfig(AsyncWebServerRequest *request);
+    static void putConfig(AsyncWebServerRequest *request, JsonVariant &json);
+    static void getWireless(AsyncWebServerRequest *request);
+    static void putWireless(AsyncWebServerRequest *request, JsonVariant &json);
 };
