@@ -12,4 +12,8 @@ Currently supports the following features:
 All of this is build with concurrency and stability in mind
 
 ## Development
-Use the PlatformIO vscode extension and install the ESP32 usb drivers
+- Use the PlatformIO vscode extension and install the ESP32 usb drivers
+- For tests:
+    - Download and install the MinGW setup.
+    - Make sure you select mingw32-base, mingw32-gcc=g++ and msys-base.
+    - Add C:\MinGW\bin to PATH
