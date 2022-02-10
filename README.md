@@ -41,7 +41,7 @@ All of this is build with concurrency and stability in mind
     "time": "2022-02-09T00:37:21"
 }
 ```
-**GET or PUT** /api/wifi
+**GET or PUT** /api/wireless
 ```json
 {
     "ssid": "yourwifinetwork",
