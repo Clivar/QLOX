@@ -17,3 +17,37 @@ All of this is build with concurrency and stability in mind
     - Download and install the MinGW setup.
     - Make sure you select mingw32-base, mingw32-gcc=g++ and msys-base.
     - Add C:\MinGW\bin to PATH
+
+## Flow
+- Connect QLOX to power and wait for the `QLOX` WiFi network to broadcast.
+- Use password `QLOXqlox`
+- Fire a udp broadcast to port 49999 of the local subnet, the response is the local ip of the device
+- Use the localip to talk to the API
+- After wifi re-configuration use the udp broadcast to find the new local ip of the device.
+
+## API
+**GET or PUT** /api/config
+```json
+{
+    "brightness": 20,
+    "red": 255,
+    "green": 255,
+    "blue": 0
+}
+```
+**GET or PUT** /api/time
+```json
+{
+    "time": "2022-02-09T00:37:21"
+}
+```
+**GET or PUT** /api/wifi
+```json
+{
+    "ssid": "yourwifinetwork",
+    "password": "yourpassword"
+}
+```
+NOTE: The password property will always show `**REDACTED**` on GET.  
+A successful PUT call will restart the device after 1 second and load the new wifi settings.  
+The default `QLOX` network will then no longer be broadcasted. 
