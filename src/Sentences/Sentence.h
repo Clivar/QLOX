@@ -5,7 +5,6 @@
 class Sentence
 {
 public:
-    virtual ~Sentence() {}
     virtual const std::string getTime(int hour, int minutes);
     virtual const std::string getDate(int day, int month);
 
