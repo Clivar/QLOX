@@ -11,6 +11,8 @@
 #include "Word.h"
 #include "Matrix.h"
 #include "Sentences/DutchSentence.h"
+#include "StateMachine.h"
+#include "ShapeFactory.h"
 
 // #define DEBUG
 // #define RESET_TIME
@@ -42,12 +44,16 @@ static class DutchSentence sentence = DutchSentence();
 #endif
 
 static class Word w = Word(letters, NUM_COLUMNS);
-static class Matrix<1> m = Matrix<NUM_LEDS_PER_LETTER>(NUM_COLUMNS, NUM_ROWS);
+static class Matrix<NUM_LEDS_PER_LETTER> m = Matrix<NUM_LEDS_PER_LETTER>(NUM_COLUMNS, NUM_ROWS);
+static class StateMachine stateMachine;
+static State state;
+static ShapeFactory factory;
 
 static RTC_DS3231 rtc;
 static CRGB leds[NUM_LEDS];
 
 void drawSentence(std::string sentence, int red, int green, int blue);
+void fadeToBlack();
 
 void setup()
 {
@@ -107,4 +113,14 @@ void drawSentence(std::string sentence, int red, int green, int blue)
     }
   }
   FastLED.show();
+}
+
+void fadeToBlack()
+{
+  for (int fade = 0; fade <= 50; fade++)
+  {
+    fadeToBlackBy(leds, NUM_LEDS, fade);
+    FastLED.show();
+    delay(30);
+  }
 }
