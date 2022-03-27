@@ -66,16 +66,31 @@ void setup()
 
 void loop()
 {
+  EVERY_N_SECONDS(5)
+  {
+    fadeToBlack();
+    state = stateMachine.next();
+  }
+
   const ApiConfigurableOptions options = Api::GetConfigurableOptions();
   FastLED.setBrightness(options.Brightness);
-
-  const DateTime now = Api::getTime();
-  std::string timeInText = sentence.getTime(now.hour(), now.minute());
-  drawSentence(timeInText.c_str(), options.Red, options.Green, options.Blue);
-  delay(3000);
-  std::string dateInText = sentence.getDate(now.day(), now.month());
-  drawSentence(dateInText.c_str(), options.Red, options.Green, options.Blue);
-  delay(3000);
+  switch (state)
+  {
+  case State::WrittenTime:
+  {
+    const DateTime now = Api::getTime();
+    std::string timeInText = sentence.getTime(now.hour(), now.minute());
+    drawSentence(timeInText.c_str(), options.Red, options.Green, options.Blue);
+    break;
+  }
+  case State::WrittenDate:
+  {
+    const DateTime now = Api::getTime();
+    std::string dateInText = sentence.getDate(now.day(), now.month());
+    drawSentence(dateInText.c_str(), options.Red, options.Green, options.Blue);
+    break;
+  }
+  }
 }
 
 void drawSentence(std::string sentence, int red, int green, int blue)
