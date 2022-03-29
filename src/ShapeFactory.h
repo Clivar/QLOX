@@ -4,17 +4,15 @@
 class ShapeFactory
 {
 private:
-    std::vector<ShapeColor> createSolidFromBitMatrix(std::string matrix, ShapeColor color)
+    std::vector<CRGB> createSolidFromBitMatrix(std::string matrix, CRGB color)
     {
-        std::vector<ShapeColor> result;
+        std::vector<CRGB> result;
         for (size_t i = 0; i < matrix.size(); i++)
         {
-            ShapeColor c;
-            if (matrix[0] == 0)
+            CRGB c;
+            if (matrix[i] == '0')
             {
-                c.r = 0;
-                c.g = 0;
-                c.b = 0;
+                c = CRGB::Black;
             }
             else
             {
@@ -22,10 +20,12 @@ private:
             }
             result.push_back(c);
         }
+
+        return result;
     }
 
 public:
-    std::vector<ShapeColor> one(ShapeColor color)
+    std::vector<CRGB> one(CRGB color)
     {
         std::string bit = "00100"
                           "01100"

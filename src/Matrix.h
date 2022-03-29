@@ -1,14 +1,16 @@
-#ifndef QLOX_MATRIX_H
-#define QLOX_MATRIX_H
-
 #include <string>
 #include <array>
 #include <math.h>
+#include <vector>
+#include "FastLED.h"
+#include <cstdio>
+
+#pragma once
 
 struct Coordinate
 {
-	unsigned short x;
-	unsigned short y;
+	int x;
+	int y;
 
 	inline bool operator==(Coordinate a) const
 	{
@@ -19,15 +21,9 @@ struct Coordinate
 	}
 };
 
-struct ShapeColor
+struct IndexWithColor
 {
-	unsigned short r;
-	unsigned short g;
-	unsigned short b;
-};
-
-struct IndexWithColor : ShapeColor
-{
+	CRGB color;
 	int index;
 };
 
@@ -40,12 +36,10 @@ private:
 
 public:
 	Matrix(const int numberOfColumns, const int numberOfRows);
-	std::vector<IndexWithColor> shapeToLed(std::vector<ShapeColor> &coloredShape, Coordinate &coordinateOfLeftUpperCorner, unsigned short numberOfColumns);
+	std::vector<IndexWithColor> shapeToLed(std::vector<CRGB> &coloredShape, Coordinate &coordinateOfLeftUpperCorner, unsigned short numberOfColumns);
 	Coordinate indexToCoordinate(int index);
 	std::array<int, numLedsPerLetter> coordinateToLed(const Coordinate &s);
 };
-
-#endif // QLOX_MATRIX_H
 
 template <size_t ledCountPerLetter>
 Matrix<ledCountPerLetter>::Matrix(const int numberOfColumns, const int numberOfRows)
@@ -93,15 +87,13 @@ std::array<int, numLedsPerLetter> Matrix<numLedsPerLetter>::coordinateToLed(cons
 }
 
 template <size_t numLedsPerLetter>
-std::vector<IndexWithColor> Matrix<numLedsPerLetter>::shapeToLed(std::vector<ShapeColor> &coloredShape, Coordinate &coordinateOfLeftUpperCorner, unsigned short numberOfColumns)
+std::vector<IndexWithColor> Matrix<numLedsPerLetter>::shapeToLed(std::vector<CRGB> &coloredShape, Coordinate &coordinateOfLeftUpperCorner, unsigned short numberOfColumns)
 {
 	std::vector<IndexWithColor> result;
 	for (size_t i = 0; i < coloredShape.size(); i++)
 	{
-		IndexWithColor c;
-		c.r = coloredShape[i].r;
-		c.g = coloredShape[i].g;
-		c.b = coloredShape[i].b;
+		IndexWithColor indexWithColor;
+		indexWithColor.color = coloredShape[i];
 
 		Coordinate c;
 		c.x = (numberOfColumns - i) % numberOfColumns;
@@ -110,11 +102,11 @@ std::vector<IndexWithColor> Matrix<numLedsPerLetter>::shapeToLed(std::vector<Sha
 		// Shift x and y according to coordinateOfLeftUpperCorner
 		c.x += coordinateOfLeftUpperCorner.x;
 		c.y += coordinateOfLeftUpperCorner.y;
+		printf("index %d for x %d y %d with color %d\n", i, c.x, c.y, indexWithColor.color.r);
 
 		const std::array<int, numLedsPerLetter> indexes = coordinateToLed(c);
 		for (size_t j = 0; j < indexes.size(); j++)
 		{
-			IndexWithColor indexWithColor = c;
 			indexWithColor.index = indexes[j];
 			result.push_back(indexWithColor);
 		}
