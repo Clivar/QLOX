@@ -80,6 +80,21 @@ void loop()
 
   const ApiConfigurableOptions options = Api::GetConfigurableOptions();
   FastLED.setBrightness(options.Brightness);
+
+  std::vector<CRGB> shape = factory.one(CRGB::Red);
+  Coordinate c;
+  c.x = 1;
+  c.y = 2;
+
+  FastLED.clear();
+  std::vector<IndexWithColor> shapedLeds = m.shapeToLed(shape, c, 5);
+  for (int i = 0; i < shapedLeds.size(); i++)
+  {
+    leds[shapedLeds[i].index] = shapedLeds[i].color;
+  }
+  FastLED.show();
+  delay(10000);
+
   switch (state)
   {
   case State::WrittenTime:
