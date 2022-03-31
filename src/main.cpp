@@ -7,12 +7,14 @@
 #include "RTClib.h"
 #include <vector>
 #include <string>
+#include <map>
 #include <iostream>
 #include "Word.h"
 #include "Matrix.h"
 #include "Sentences/DutchSentence.h"
 #include "StateMachine.h"
 #include "ShapeFactory.h"
+#include "DigitalNumbers.h"
 
 // #define DEBUG
 // #define RESET_TIME
@@ -24,7 +26,7 @@
 #define NUM_COLUMNS 16
 #define NUM_ROWS 16
 
-const std::string letters PROGMEM = "HETDAGNBPLUISZEG"
+const PROGMEM std::string letters = "HETDAGNBPLUISZEG"
                                     "RALKISTEENZESELF"
                                     "DRIEVIERVIJFTWEE"
                                     "ZEVENACHTNEGENEN"
@@ -52,7 +54,8 @@ static ShapeFactory factory;
 static RTC_DS3231 rtc;
 static CRGB leds[NUM_LEDS];
 
-void drawSentence(std::string sentence, int red, int green, int blue);
+void drawSentence(std::string &sentence, CRGB &color);
+void drawNumber(uint8_t number, Coordinate offset, CRGB color);
 void fadeToBlack();
 
 void setup()
@@ -81,51 +84,88 @@ void loop()
   const ApiConfigurableOptions options = Api::GetConfigurableOptions();
   FastLED.setBrightness(options.Brightness);
 
-  std::vector<CRGB> shape = factory.one(CRGB::Red);
-  Coordinate c;
-  c.x = 1;
-  c.y = 2;
-
-  FastLED.clear();
-  std::vector<IndexWithColor> shapedLeds = m.shapeToLed(shape, c, 5);
-  for (int i = 0; i < shapedLeds.size(); i++)
-  {
-    leds[shapedLeds[i].index] = shapedLeds[i].color;
-  }
-  FastLED.show();
-  delay(10000);
-
+  const CRGB color = CRGB(options.Red, options.Green, options.Blue);
   switch (state)
   {
   case State::WrittenTime:
   {
     const DateTime now = Api::getTime();
     std::string timeInText = sentence.getTime(now.hour(), now.minute());
-    drawSentence(timeInText.c_str(), options.Red, options.Green, options.Blue);
+    drawSentence(timeInText.c_str(), color);
     break;
   }
   case State::WrittenDate:
   {
     const DateTime now = Api::getTime();
     std::string dateInText = sentence.getDate(now.day(), now.month());
-    drawSentence(dateInText.c_str(), options.Red, options.Green, options.Blue);
+    drawSentence(dateInText.c_str(), color);
+    break;
+  }
+  case State::DigitalTime:
+  {
+    const DateTime now = Api::getTime();
+    drawNumber(now.hour() < 10 ? 0 : 1, {2, 0}, color);
+    drawNumber(now.hour() % 10, {9, 0}, color);
+    drawNumber(now.minute() % 10, {2, 9}, color);
+    drawNumber(now.minute() % 10, {9, 9}, color);
     break;
   }
   }
 }
 
-void drawSentence(std::string sentence, int red, int green, int blue)
+void turnOnLed(const std::array<int, NUM_LEDS_PER_LETTER> &ledIndexes, const CRGB &color)
+{
+  for (size_t i = 0; i < ledIndexes.size(); i++)
+  {
+    leds[ledIndexes[i]] = color;
+  }
+}
+
+void drawNumber(uint8_t number, Coordinate offset, CRGB color)
+{
+  // Number of leds is not important here, so we pick '1' to keep it simple
+  // Use a smaller matrix to determine positions of number indexes
+  Matrix<1> numberMatrix = Matrix<1>(5, 7);
+  std::map<uint8_t, std::array<uint8_t, 35>> map{
+      {0, zero},
+      {1, one},
+      {2, two},
+      {3, three},
+      {4, four},
+      {5, five},
+      {6, six},
+      {7, seven},
+      {8, eight},
+      {9, nine},
+  };
+  const std::array<uint8_t, 35> a = map[number];
+
+  FastLED.clear();
+  for (size_t i = 0; i < a.size(); i++)
+  {
+    Coordinate c = numberMatrix.indexToCoordinate(i, offset);
+    const std::array<int, NUM_LEDS_PER_LETTER> ledIndexes = m.coordinateToLed(c);
+    if (a[i] == 0)
+    {
+      turnOnLed(ledIndexes, CRGB::Black);
+    }
+    else
+    {
+      turnOnLed(ledIndexes, color);
+    }
+  }
+  FastLED.show();
+}
+
+void drawSentence(const std::string &sentence, const CRGB &color)
 {
   FastLED.clear();
   std::vector<int> r = w.findSentence(sentence);
   for (int i = 0; i < r.size(); i++)
   {
-    Coordinate s = m.indexToCoordinate(r[i]);
+    Coordinate s = m.indexToCoordinate(r[i], {0, 0});
     std::array<int, NUM_LEDS_PER_LETTER> ledIndexes = m.coordinateToLed(s);
-    for (size_t i = 0; i < ledIndexes.size(); i++)
-    {
-      leds[ledIndexes[i]].setRGB(red, green, blue);
-    }
+    turnOnLed(ledIndexes, color);
   }
   FastLED.show();
 }

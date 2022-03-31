@@ -36,8 +36,7 @@ private:
 
 public:
 	Matrix(const int numberOfColumns, const int numberOfRows);
-	std::vector<IndexWithColor> shapeToLed(std::vector<CRGB> &coloredShape, Coordinate &coordinateOfLeftUpperCorner, unsigned short numberOfColumns);
-	Coordinate indexToCoordinate(int index);
+	Coordinate indexToCoordinate(int index, const Coordinate &offset);
 	std::array<int, numLedsPerLetter> coordinateToLed(const Coordinate &s);
 };
 
@@ -49,18 +48,16 @@ Matrix<ledCountPerLetter>::Matrix(const int numberOfColumns, const int numberOfR
 }
 
 template <size_t numLedsPerLetter>
-Coordinate Matrix<numLedsPerLetter>::indexToCoordinate(int index)
+Coordinate Matrix<numLedsPerLetter>::indexToCoordinate(int index, const Coordinate &offset)
 {
-	index++;
-	int row = floor(index / numberOfColumns);
-	int column = (index % numberOfColumns) - 1;
-	if (column == -1)
-	{
-		row--;
-		column = numberOfColumns - 1;
-	}
+	int x = index % numberOfColumns;
+	int y = floor((double)index / numberOfColumns);
 
-	return {column, row};
+	// Shift x and y according to offset
+	x += offset.x;
+	y += offset.y;
+
+	return {x, y};
 }
 
 template <size_t numLedsPerLetter>
@@ -81,35 +78,6 @@ std::array<int, numLedsPerLetter> Matrix<numLedsPerLetter>::coordinateToLed(cons
 	for (size_t i = 0; i < numLedsPerLetter; i++)
 	{
 		result[i] = (rowsFromBottom * numberOfColumns) + (numberOfColumns - s.x) - 1 - i;
-	}
-
-	return result;
-}
-
-template <size_t numLedsPerLetter>
-std::vector<IndexWithColor> Matrix<numLedsPerLetter>::shapeToLed(std::vector<CRGB> &coloredShape, Coordinate &coordinateOfLeftUpperCorner, unsigned short numberOfColumns)
-{
-	std::vector<IndexWithColor> result;
-	for (size_t i = 0; i < coloredShape.size(); i++)
-	{
-		IndexWithColor indexWithColor;
-		indexWithColor.color = coloredShape[i];
-
-		Coordinate c;
-		c.x = (numberOfColumns - i) % numberOfColumns;
-		c.y = floor((double)i / numberOfColumns);
-
-		// Shift x and y according to coordinateOfLeftUpperCorner
-		c.x += coordinateOfLeftUpperCorner.x;
-		c.y += coordinateOfLeftUpperCorner.y;
-		printf("index %d for x %d y %d with color %d\n", i, c.x, c.y, indexWithColor.color.r);
-
-		const std::array<int, numLedsPerLetter> indexes = coordinateToLed(c);
-		for (size_t j = 0; j < indexes.size(); j++)
-		{
-			indexWithColor.index = indexes[j];
-			result.push_back(indexWithColor);
-		}
 	}
 
 	return result;

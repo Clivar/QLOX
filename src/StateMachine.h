@@ -4,17 +4,15 @@
 
 enum State
 {
-    Custom,
-    Time,
+    DigitalTime,
     WrittenTime,
     WrittenDate,
-    Rainbow
 };
 
 class StateMachine
 {
 private:
-    const std::array<State, 2> states{{WrittenTime, WrittenDate}};
+    const std::array<State, 3> states{{WrittenTime, WrittenDate, DigitalTime}};
     int i = 0;
 
 public:
