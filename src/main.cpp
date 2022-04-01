@@ -55,6 +55,7 @@ static CRGB leds[NUM_LEDS];
 void drawSentence(const std::string &sentence, const CRGB &color);
 void drawNumber(uint8_t number, Coordinate offset, const CRGB &color);
 void drawSecondIndicator(const CRGB &color);
+void drawRainAnimation(const CRGB &color);
 void fadeToBlack();
 
 void setup()
@@ -74,7 +75,7 @@ void setup()
 
 void loop()
 {
-  EVERY_N_SECONDS(5)
+  EVERY_N_SECONDS(10)
   {
     fadeToBlack();
     state = stateMachine.next();
@@ -114,6 +115,11 @@ void loop()
     drawNumber(now.minute() / 10, {2, 9}, color);
     drawNumber(now.minute() % 10, {9, 9}, color);
     FastLED.show();
+    break;
+  }
+  case State::Rain:
+  {
+    drawRainAnimation(color);
     break;
   }
   }
@@ -193,5 +199,71 @@ void fadeToBlack()
     fadeToBlackBy(leds, NUM_LEDS, fade);
     FastLED.show();
     delay(30);
+  }
+  FastLED.clear();
+}
+
+uint16_t XY(uint8_t x, uint8_t y)
+{
+  return (y * NUM_COLUMNS + x);
+}
+
+// Based on: Digital Rain implementation
+// Yaroslaw Turbin 24.08.2020
+// https://vk.com/ldirko
+// https://www.reddit.com/user/ldirko/
+void drawRainAnimation(const CRGB &color)
+{
+  static byte rain[NUM_LEDS];
+  static bool init = true;
+  static byte counter = 1;
+  static int speed = 1;
+  if (init)
+  {
+    for (int i = 0; i < NUM_LEDS; i++)
+    {
+      if (random8(20) == 0)
+      {
+        rain[i] = 1; // random8(20) number of dots. decrease for more dots
+      }
+      else
+      {
+        rain[i] = 0;
+      }
+    }
+    init = false;
+  }
+
+  EVERY_N_MILLISECONDS(100)
+  {
+    for (byte i = 0; i < NUM_COLUMNS; i++)
+    {
+      for (byte j = 0; j < NUM_ROWS; j++)
+      {
+        byte layer = rain[((j + speed + random8(2) + NUM_ROWS) % NUM_ROWS) * NUM_COLUMNS + i];
+        if (layer)
+        {
+          const uint8_t x = (NUM_COLUMNS - 1) - i;
+          const uint8_t y = (NUM_ROWS - 1) - j;
+          turnOnLed(m.coordinateToLed({x, y}), color);
+        }
+      }
+    }
+
+    speed++;
+    fadeToBlackBy(leds, NUM_LEDS, 40);
+    blurRows(leds, NUM_COLUMNS, NUM_ROWS, 16);
+    FastLED.show();
+  }
+
+  EVERY_N_MILLISECONDS(30)
+  {
+    int rand1 = random16(NUM_LEDS);
+    int rand2 = random16(NUM_LEDS);
+    if ((rain[rand1] == 1) && (rain[rand2] == 0))
+    {
+      rain[rand1] = 0;
+      rain[rand2] = 1;
+    }
   }
 }

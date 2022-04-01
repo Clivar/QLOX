@@ -7,12 +7,13 @@ enum State
     DigitalTime,
     WrittenTime,
     WrittenDate,
+    Rain
 };
 
 class StateMachine
 {
 private:
-    const std::array<State, 3> states{{WrittenTime, WrittenDate, DigitalTime}};
+    const std::array<State, 4> states{{WrittenTime, WrittenDate, DigitalTime, Rain}};
     int i = 0;
 
 public:
