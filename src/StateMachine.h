@@ -18,10 +18,11 @@ private:
 public:
     State next()
     {
-        if (i++ > states.size())
+        if (++i >= states.size())
         {
             i = 0;
         }
-        return states[i++];
+
+        return states[i];
     }
 };
