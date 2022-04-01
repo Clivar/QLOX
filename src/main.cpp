@@ -13,7 +13,6 @@
 #include "Matrix.h"
 #include "Sentences/DutchSentence.h"
 #include "StateMachine.h"
-#include "ShapeFactory.h"
 #include "DigitalNumbers.h"
 
 // #define DEBUG
@@ -49,13 +48,13 @@ static class Word w = Word(letters, NUM_COLUMNS);
 static class Matrix<NUM_LEDS_PER_LETTER> m = Matrix<NUM_LEDS_PER_LETTER>(NUM_COLUMNS, NUM_ROWS);
 static class StateMachine stateMachine;
 static State state;
-static ShapeFactory factory;
 
 static RTC_DS3231 rtc;
 static CRGB leds[NUM_LEDS];
 
-void drawSentence(std::string &sentence, CRGB &color);
-void drawNumber(uint8_t number, Coordinate offset, CRGB color);
+void drawSentence(const std::string &sentence, const CRGB &color);
+void drawNumber(uint8_t number, Coordinate offset, const CRGB &color);
+void drawSecondIndicator(const CRGB &color);
 void fadeToBlack();
 
 void setup()
@@ -91,23 +90,30 @@ void loop()
   {
     const DateTime now = Api::getTime();
     std::string timeInText = sentence.getTime(now.hour(), now.minute());
-    drawSentence(timeInText.c_str(), color);
+    FastLED.clear();
+    drawSentence(timeInText, color);
+    FastLED.show();
     break;
   }
   case State::WrittenDate:
   {
     const DateTime now = Api::getTime();
     std::string dateInText = sentence.getDate(now.day(), now.month());
-    drawSentence(dateInText.c_str(), color);
+    FastLED.clear();
+    drawSentence(dateInText, color);
+    FastLED.show();
     break;
   }
   case State::DigitalTime:
   {
     const DateTime now = Api::getTime();
-    drawNumber(now.hour() < 10 ? 0 : 1, {2, 0}, color);
+    FastLED.clear();
+    drawNumber(now.hour() / 10, {2, 0}, color);
     drawNumber(now.hour() % 10, {9, 0}, color);
-    drawNumber(now.minute() % 10, {2, 9}, color);
+    drawSecondIndicator(color);
+    drawNumber(now.minute() / 10, {2, 9}, color);
     drawNumber(now.minute() % 10, {9, 9}, color);
+    FastLED.show();
     break;
   }
   }
@@ -121,7 +127,24 @@ void turnOnLed(const std::array<int, NUM_LEDS_PER_LETTER> &ledIndexes, const CRG
   }
 }
 
-void drawNumber(uint8_t number, Coordinate offset, CRGB color)
+void drawSecondIndicator(const CRGB &color)
+{
+  static bool turnItOn = false;
+  EVERY_N_MILLISECONDS(1000)
+  {
+    turnItOn = !turnItOn;
+  }
+
+  if (!turnItOn)
+    return;
+
+  turnOnLed(m.coordinateToLed({7, 7}), color);
+  turnOnLed(m.coordinateToLed({8, 7}), color);
+  turnOnLed(m.coordinateToLed({7, 8}), color);
+  turnOnLed(m.coordinateToLed({8, 8}), color);
+}
+
+void drawNumber(uint8_t number, Coordinate offset, const CRGB &color)
 {
   // Number of leds is not important here, so we pick '1' to keep it simple
   // Use a smaller matrix to determine positions of number indexes
@@ -138,28 +161,22 @@ void drawNumber(uint8_t number, Coordinate offset, CRGB color)
       {8, eight},
       {9, nine},
   };
+
   const std::array<uint8_t, 35> a = map[number];
 
-  FastLED.clear();
   for (size_t i = 0; i < a.size(); i++)
   {
     Coordinate c = numberMatrix.indexToCoordinate(i, offset);
     const std::array<int, NUM_LEDS_PER_LETTER> ledIndexes = m.coordinateToLed(c);
-    if (a[i] == 0)
-    {
-      turnOnLed(ledIndexes, CRGB::Black);
-    }
-    else
+    if (a[i] > 0)
     {
       turnOnLed(ledIndexes, color);
     }
   }
-  FastLED.show();
 }
 
 void drawSentence(const std::string &sentence, const CRGB &color)
 {
-  FastLED.clear();
   std::vector<int> r = w.findSentence(sentence);
   for (int i = 0; i < r.size(); i++)
   {
@@ -167,7 +184,6 @@ void drawSentence(const std::string &sentence, const CRGB &color)
     std::array<int, NUM_LEDS_PER_LETTER> ledIndexes = m.coordinateToLed(s);
     turnOnLed(ledIndexes, color);
   }
-  FastLED.show();
 }
 
 void fadeToBlack()
