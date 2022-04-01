@@ -8,6 +8,7 @@ Currently supports the following features:
 - Broadcasts a WiFi network by default (with the option to link it to an existing WiFi network)
 - Responds with its local ip to a specific UDP broadcast
 - Provides an API over http to configure the time/date, color, brightness and wifi network
+- Uses a StateMachine to draw the the time and date in sentences and digitally
 
 All of this is build with concurrency and stability in mind
 
