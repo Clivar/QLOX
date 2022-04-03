@@ -242,7 +242,7 @@ void drawRainAnimation(const CRGB &color)
     init = false;
   }
 
-  EVERY_N_MILLISECONDS(100)
+  EVERY_N_MILLISECONDS(80)
   {
     for (byte i = 0; i < NUM_COLUMNS; i++)
     {
@@ -259,12 +259,12 @@ void drawRainAnimation(const CRGB &color)
     }
 
     speed++;
-    fadeToBlackBy(leds, NUM_LEDS, 40);
+    fadeToBlackBy(leds, NUM_LEDS, 70);
     blurRows(leds, NUM_COLUMNS, NUM_ROWS, 16);
     FastLED.show();
   }
 
-  EVERY_N_MILLISECONDS(30)
+  EVERY_N_MILLISECONDS(15)
   {
     int rand1 = random16(NUM_LEDS);
     int rand2 = random16(NUM_LEDS);
