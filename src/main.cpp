@@ -203,6 +203,11 @@ void fadeToBlack()
   FastLED.clear();
 }
 
+uint16_t XY(uint8_t x, uint8_t y)
+{
+  return (y * NUM_COLUMNS + x);
+}
+
 // Based on: Digital Rain implementation
 // Yaroslaw Turbin 24.08.2020
 // https://vk.com/ldirko
