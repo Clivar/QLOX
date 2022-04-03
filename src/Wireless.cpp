@@ -37,7 +37,6 @@ void Wireless::setup()
     else
     {
         Serial.println("Initialised as AP");
-        WiFi.config(IPAddress(192, 168, 1, 1), INADDR_NONE, IPAddress(255, 255, 255, 0), INADDR_NONE);
         WiFi.setHostname(hostName.c_str());
         WiFi.mode(WIFI_AP);
         ssid = DEFAULT_SSID;
@@ -89,8 +88,8 @@ void Wireless::wiFiAPStart(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     Serial.println("WiFi Soft AP started");
     Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
-    listenForBroadcast(WiFi.localIP().toString());
+    Serial.println(WiFi.softAPIP());
+    listenForBroadcast(WiFi.softAPIP().toString());
 }
 
 void Wireless::wiFiAPStop(WiFiEvent_t event, WiFiEventInfo_t info)
