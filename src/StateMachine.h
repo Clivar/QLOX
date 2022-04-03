@@ -7,23 +7,20 @@ enum State
     DigitalTime,
     WrittenTime,
     WrittenDate,
-    Rain
+    Rain,
+    Rainbow
 };
 
 class StateMachine
 {
 private:
-    const std::array<State, 4> states{{WrittenTime, WrittenDate, DigitalTime, Rain}};
+    const std::array<State, 5> states{{WrittenTime, WrittenDate, DigitalTime, Rain, Rainbow}};
     int i = 0;
 
 public:
     State next()
     {
-        if (++i >= states.size())
-        {
-            i = 0;
-        }
-
+        i = (i + 1) % states.size();
         return states[i];
     }
 };

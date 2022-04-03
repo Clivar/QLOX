@@ -122,6 +122,14 @@ void loop()
     drawRainAnimation(color);
     break;
   }
+  case State::Rainbow:
+  {
+    static uint8_t hue = 0;
+    EVERY_N_MILLISECONDS(20) { hue++; }
+    fill_rainbow(leds, NUM_LEDS, hue, 7);
+    FastLED.show();
+    break;
+  }
   }
 }
 
