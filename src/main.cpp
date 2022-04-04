@@ -53,7 +53,7 @@ void setup()
 #ifdef RESET_TIME
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 #endif
-  FastLED.addLeds<NEOPIXEL, 26>(leds, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, PIN_LEDS>(leds, NUM_LEDS);
 }
 
 void loop()
