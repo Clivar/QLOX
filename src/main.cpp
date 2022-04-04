@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include "Wireless.h"
 #include "Api.h"
-
 #include "FastLED.h"
 #include <Wire.h>
 #include "RTClib.h"
@@ -15,33 +14,17 @@
 #include "StateMachine.h"
 #include "DigitalNumbers.h"
 
+// Specify what preset to use
+#define PROTOTYPE2
+#include "Presets.cpp"
+
 // #define DEBUG
 // #define RESET_TIME
-#define DUTCH_SMALL_CLOCK
+
+const PROGMEM std::string letters = LETTERSEQUENCE
 
 #ifdef DUTCH_SMALL_CLOCK
-#define NUM_LEDS 256
-#define NUM_LEDS_PER_LETTER 1
-#define NUM_COLUMNS 16
-#define NUM_ROWS 16
-
-const PROGMEM std::string letters = "HETDAGNBPLUISZEG"
-                                    "RALKISTEENZESELF"
-                                    "DRIEVIERVIJFTWEE"
-                                    "ZEVENACHTNEGENEN"
-                                    "DERTIENVEERTIENY"
-                                    "TWAALFHKWARTSUUR"
-                                    "TWINTIGMOVERVOOR"
-                                    "HALFXEENTWEEDRIE"
-                                    "VIERVIJFZESZEVEN"
-                                    "ACHTNEGENTIENELF"
-                                    "TWAALFDERTIGDMEI"
-                                    "FEBRUARIJUNIJULI"
-                                    "XAPRILGTAUGUSTUS"
-                                    "SEPTEMBERJANUARI"
-                                    "TRMAARTWOKTOBERK"
-                                    "NOVEMBERDECEMBER";
-static class DutchSentence sentence = DutchSentence();
+    static class DutchSentence sentence = DutchSentence();
 #endif
 
 static class Word w = Word(letters, NUM_COLUMNS);
@@ -70,7 +53,7 @@ void setup()
 #ifdef RESET_TIME
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 #endif
-  FastLED.addLeds<NEOPIXEL, 33>(leds, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, 26>(leds, NUM_LEDS);
 }
 
 void loop()
